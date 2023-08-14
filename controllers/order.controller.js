@@ -139,6 +139,8 @@ export const paymentVerification = asyncHandler(async (req, res) => {
     // updating the stock
     for (const item of products) {
         const product = await Product.findById(item.productId)
+        // console.log(`product: ${product}`)
+        // console.log(`item: ${item}`)
 
         product.sizes = product.sizes.map(el => {
             if(el.size === item.size) {
@@ -147,7 +149,8 @@ export const paymentVerification = asyncHandler(async (req, res) => {
             return el;
         })
 
-        product.sold = product.sold + Number(item.count)
+
+        product.sold = product.sold + item?.count
 
         await product.save()
     }

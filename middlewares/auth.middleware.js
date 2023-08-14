@@ -11,7 +11,6 @@ import CustomError from "../utils/customError.js";
 
 export const isLoggedIn = asyncHandler(async (req, res, next) => {
   let token;
-  console.log(req.cookies)
 
   if (req.cookies.token || (req.headers.authorization && req.headers.authorization.startsWith("Bearer"))) {
     token = req.cookies.token || req.headers.authorization.split(" ")[1];
