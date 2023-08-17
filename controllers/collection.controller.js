@@ -147,20 +147,36 @@ export const getCollection = asyncHandler(async (req, res) => {
  *********************************************************/
 
  export const getProductByCollectionId = asyncHandler(async (req, res) => {
-    const {id} = req.params
-    const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || 9
-    const skipCount = ( page - 1) * limit
+    const { id } = req.params;
+const page = Number(req.query.page) || 1;
+const limit = Number(req.query.limit) || 9;
+const pricing = req.query.pricing;
+const skipCount = (page - 1) * limit;
 
-    // sorting the array with _id: -1 to get the recently added product at the first position and so on.
-    const products = await Product.find({collectionId: id}).sort({_id: -1}).skip(skipCount).limit(limit)
+let sortingOption = {};
+if (pricing) {
+    sortingOption.sellingPrice = pricing;
+}
 
-    if(!products) {
-        throw new CustomError("No product found in DB", 400)
+// Use a single sorting object that includes both criteria
+const combinedSorting = {
+    ...sortingOption,
+    _id: -1 // Sorting by _id: -1 for recently added products
+};
+
+
+    const products = await Product.find({ collectionId: id })
+        .sort(combinedSorting) // Apply the combined sorting criteria
+        .skip(skipCount)
+        .limit(limit);
+
+    if (!products.length) {
+        throw new CustomError("No product found in DB", 400);
     }
 
     return res.status(200).json({
         success: true,
         products
-    })
+})
+
 })

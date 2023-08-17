@@ -22,7 +22,6 @@ const productSchema = new mongoose.Schema(
         description: {
             type: String,
             trim: true
-            // add an editor - npm package
         },
         colourShown: {
             type: String,
