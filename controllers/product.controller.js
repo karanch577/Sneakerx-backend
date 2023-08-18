@@ -349,10 +349,9 @@ export const getSearchedProducts = asyncHandler(async (req, res) => {
     
     const regex = new RegExp(q, 'i');
     
-    const products = await Product.find({
-      name: { $regex: regex }
-    });
-    console.log(q)
+    const products = await Product.find(
+        {name: { $regex: regex }
+    }).populate("collectionId", "name");
     
     if(!products.length) {
         throw new CustomError("No product found in db", 404)
