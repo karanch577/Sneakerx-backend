@@ -1,19 +1,14 @@
-# Phonezone-Backend
+# Sneakerx-Backend
 
-This is an e-commerce application built using the MERN stack - MongoDB, Express, React, and Node.js. For the state management, contextAPI is used.<br>The application allows users to browse, search, and purchase products from the store.
+This is an e-commerce application built using the MERN stack - MongoDB, Express, React, and Node.js. For the state management, Redux-toolkit is used.<br>The application allows users to browse, search, and purchase products from the store.
 
-### Time taken - 2 Months
+### Time taken - 1 Months
 
-### [Live Link](https://phonezone.vercel.app)
+### [Live Link](https://sneakerx-karan.netlify.app)
 
-### This is the backend repository of the project. You can find the backend of this project [here](https://github.com/karanch577/ecommerce-mega-project). <br> A sample.env file has been added.
+### This is the backend repository of the project. You can find the frontend of this project [here](https://github.com/karanch577/Sneakerx-frontend). <br> A sample.env file has been added.
 
 ## Demo Users
-
-### Admin: 
-email - karan1@gmail.com <br>
-password - 123123 <br>
-login page - [click here](https://phonezone.vercel.app/login/admin)
 
 ### User: 
 email - karandemo577@gmail.com <br>

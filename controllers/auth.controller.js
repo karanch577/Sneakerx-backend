@@ -143,7 +143,7 @@ export const forgetPassword = asyncHandler(async(req, res) => {
 
     console.log(req.protocol)
     console.log(req.get("X-Forwarded-Host"))
-    const resetUrl = `${req.headers.origin}/user/reset-password/${resetToken}`
+    const resetUrl = `${req.headers.origin}/resetPassword/${resetToken}`
     console.log(resetToken)
     const text = `Click on the link to reset the password - \n\n${resetUrl}\n\n`
 
@@ -197,8 +197,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
     if(password !== confirmPassword) {
         throw new CustomError("Password and confirm password do not match", 400)
     }
-    console.log(user)
-    console.log(password)
 
     user.password = password
     user.forgotPasswordToken = undefined
