@@ -11,7 +11,7 @@ This is an e-commerce application built using the MERN stack - MongoDB, Express,
 ## Demo Users
 
 ### User: 
-email - karandemo577@gmail.com <br>
+email - iwebtrends@gmail.com <br>
 password - 123123
 login page - [click here](https://phonezone.vercel.app/login)
 
