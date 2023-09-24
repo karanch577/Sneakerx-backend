@@ -3,8 +3,6 @@ import Product from "../models/product.schema.js";
 import asyncHandler from "../services/asyncHandler.js";
 import CustomError from "../utils/customError.js";
 
-
-
 /***************************************************************
  * @CREATE_COLLECTION
  * @REQUEST_TYPE POST
@@ -14,25 +12,25 @@ import CustomError from "../utils/customError.js";
  ***************************************************************/
 
 export const createCollection = asyncHandler(async (req, res) => {
-    const { name } = req.body
-    if(!name) {
-        throw new CustomError("Please fill the name field", 401)
-    }
-    const user = req.user
+  const { name } = req.body;
+  if (!name) {
+    throw new CustomError("Please fill the name field", 401);
+  }
+  const user = req.user;
 
-    if(user.role === "ADMIN") {
-        const collection = await Collection.create({
-            name
-        })
-        return res.status(200).json({
-            success: true,
-            message: "Collection created successfully",
-            collection
-        })
-    }
-    
-    throw new CustomError("Only admin can create collection", 401)
-})
+  if (user.role === "ADMIN") {
+    const collection = await Collection.create({
+      name,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Collection created successfully",
+      collection,
+    });
+  }
+
+  throw new CustomError("Only admin can create collection", 401);
+});
 
 /***************************************************************
  * @GET_COLLECTIONS
@@ -43,17 +41,17 @@ export const createCollection = asyncHandler(async (req, res) => {
  ***************************************************************/
 
 export const getCollections = asyncHandler(async (req, res) => {
-    const collections = await Collection.find({})
-    if(collections.length) {
-        res.status(200).json({
-            success: true,
-            message: "An array of all collections",
-            collections
-        })
-    }else {
-        throw new CustomError("No collection available in DB", 401)
-    }
-})
+  const collections = await Collection.find({});
+  if (collections.length) {
+    res.status(200).json({
+      success: true,
+      message: "An array of all collections",
+      collections,
+    });
+  } else {
+    throw new CustomError("No collection available in DB", 401);
+  }
+});
 
 /***************************************************************
  * @UPDATE_COLLECTION
@@ -64,31 +62,30 @@ export const getCollections = asyncHandler(async (req, res) => {
  ***************************************************************/
 
 export const updateCollection = asyncHandler(async (req, res) => {
-    const user = req.user
-   
-    const { name } = req.body
-    if(!name) {
-        throw new CustomError("Name field is required", 401)
+  const user = req.user;
+
+  const { name } = req.body;
+  if (!name) {
+    throw new CustomError("Name field is required", 401);
+  }
+  const { id } = req.params;
+  if (id) {
+    const collection = await Collection.findById(id);
+
+    if (collection) {
+      collection.name = name;
+      await collection.save();
+      return res.status(200).json({
+        success: true,
+        message: "Collection updated successfully",
+        collection,
+      });
     }
-    const { id } = req.params
-    if(id) {
-        const collection = await Collection.findById(id)
+    throw new CustomError(`No collection found by the id ${editId}`);
+  }
 
-        if(collection) {
-            collection.name = name
-            await collection.save()
-            return res.status(200).json({
-                success: true,
-                message: "Collection updated successfully",
-                collection
-            })
-        }
-        throw new CustomError(`No collection found by the id ${editId}`)
-    }
-
-    throw new CustomError("Enter the collection Id", 401)
-
-})
+  throw new CustomError("Enter the collection Id", 401);
+});
 
 /***************************************************************
  * @DELETE_COLLECTION
@@ -99,19 +96,19 @@ export const updateCollection = asyncHandler(async (req, res) => {
  ***************************************************************/
 
 export const deleteCollection = asyncHandler(async (req, res) => {
-    const user = req.user
+  const user = req.user;
 
-    const { id } = req.params
-    if(id) {
-        await Collection.findByIdAndDelete(id)
+  const { id } = req.params;
+  if (id) {
+    await Collection.findByIdAndDelete(id);
 
-        return res.status(200).json({
-            success: true,
-            message: "Collection deleted successfully"
-        })
-    }
-    throw new CustomError("Provide the collection id", 401)
-})
+    return res.status(200).json({
+      success: true,
+      message: "Collection deleted successfully",
+    });
+  }
+  throw new CustomError("Provide the collection id", 401);
+});
 
 /***************************************************************
  * @GET_COLLECTION
@@ -122,21 +119,20 @@ export const deleteCollection = asyncHandler(async (req, res) => {
  ***************************************************************/
 
 export const getCollection = asyncHandler(async (req, res) => {
-    const collectionId = req.params
-    if(!collectionId) {
-        throw new CustomError("Provide the collection Id", 401)
-    }
-    const collection = await Collection.findById(collectionId) 
-    if(!collection) {
-        throw new CustomError("Collection not found in DB", 401)
-    }
-    return res.status(200).json({
-        success: true,
-        message: "Collection found in DB",
-        collection
-    })
-})
-
+  const collectionId = req.params;
+  if (!collectionId) {
+    throw new CustomError("Provide the collection Id", 401);
+  }
+  const collection = await Collection.findById(collectionId);
+  if (!collection) {
+    throw new CustomError("Collection not found in DB", 401);
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Collection found in DB",
+    collection,
+  });
+});
 
 /**********************************************************
  * @GET_PRODUCTS_BY_COLLECTIONID
@@ -146,37 +142,36 @@ export const getCollection = asyncHandler(async (req, res) => {
  * @returns Product Object
  *********************************************************/
 
- export const getProductByCollectionId = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-const page = Number(req.query.page) || 1;
-const limit = Number(req.query.limit) || 9;
-const pricing = req.query.pricing;
-const skipCount = (page - 1) * limit;
+export const getProductByCollectionId = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 9;
+  const pricing = req.query.pricing;
+  const skipCount = (page - 1) * limit;
 
-let sortingOption = {};
-if (pricing) {
+  let sortingOption = {};
+  if (pricing) {
     sortingOption.sellingPrice = pricing;
-}
+  }
 
-// Use a single sorting object that includes both criteria
-const combinedSorting = {
-    ...sortingOption,
-    _id: -1 // Sorting by _id: -1 for recently added products
-};
+  // Use a single sorting object that includes both criteria
+  const combinedSorting = {
+      ...sortingOption,
+      _id: -1, // Sorting by _id: -1 for recently added products
+  };
 
 
-    const products = await Product.find({ collectionId: id })
-        .sort(combinedSorting) // Apply the combined sorting criteria
-        .skip(skipCount)
-        .limit(limit);
+  const products = await Product.find({ collectionId: id})
+    .sort(combinedSorting) // Apply the combined sorting criteria
+    .skip(skipCount)
+    .limit(limit);
 
-    if (!products.length) {
-        throw new CustomError("No product found in DB", 400);
-    }
+  if (!products.length) {
+    throw new CustomError("No product found in DB", 400);
+  }
 
-    return res.status(200).json({
-        success: true,
-        products
-})
-
-})
+  return res.status(200).json({
+    success: true,
+    products,
+  });
+});

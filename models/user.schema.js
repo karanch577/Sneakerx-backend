@@ -52,6 +52,10 @@ userSchema.pre("save", async function(next) {
     next();
 })
 
+userSchema.pre("save", async function(next) {
+    if(!this.isModified("password")) return next()
+})
+
 // add methods to schema directly
 
 userSchema.methods = {

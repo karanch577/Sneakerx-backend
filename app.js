@@ -27,7 +27,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
     credentials: true,
-    origin: "https://sneakerx-karan.netlify.app"
+    origin: "https://sneakerx-frontend.vercel.app"
     // origin: "http://localhost:5173"
 }))
 
