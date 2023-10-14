@@ -16,6 +16,7 @@ export const isLoggedIn = asyncHandler(async (req, res, next) => {
     token = req.cookies.token || req.headers.authorization.split(" ")[1];
   }
 
+  console.log(`token ${token}`)
   if (!token) {
     throw new CustomError("Not authorized to access the route1", 401);
   }
