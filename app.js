@@ -26,9 +26,10 @@ const swaggerDocument = YAML.parse(file)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
+    origin: "https://sneakerx-frontend.vercel.app",
+    // origin: "http://localhost:5173",
     credentials: true,
-    origin: "https://sneakerx-frontend.vercel.app"
-    // origin: "http://localhost:5173"
+
 }))
 
 app.use(cookieParser())

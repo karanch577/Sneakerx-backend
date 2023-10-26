@@ -4,7 +4,7 @@ This is an e-commerce application built using the MERN stack - MongoDB, Express,
 
 ### Time taken - 1 Months
 
-### [Live Link](https://sneakerx-karan.netlify.app)
+### [Live Link](https://sneakerx-frontend.vercel.app)
 
 ### This is the backend repository of the project. You can find the frontend of this project [here](https://github.com/karanch577/Sneakerx-frontend). <br> A sample.env file has been added.
 
@@ -13,7 +13,7 @@ This is an e-commerce application built using the MERN stack - MongoDB, Express,
 ### User: 
 email - iwebtrends@gmail.com <br>
 password - 123123
-login page - [click here](https://phonezone.vercel.app/login)
+login page - [click here](https://sneakerx-frontend.vercel.app/login)
 
 ## Technologies
 This project was built using the following technologies:
