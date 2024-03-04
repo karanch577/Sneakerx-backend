@@ -4,7 +4,7 @@ import {
   getCollections,
   updateCollection,
   deleteCollection,
-  getProductByCollectionId,
+  getProductByCollectionId
 } from "../controllers/collection.controller.js";
 import { isLoggedIn, verifyPermission } from "../middlewares/auth.middleware.js";
 import authRoles from "../utils/authRoles.js";

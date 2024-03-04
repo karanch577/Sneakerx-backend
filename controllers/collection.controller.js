@@ -175,3 +175,4 @@ export const getProductByCollectionId = asyncHandler(async (req, res) => {
     products,
   });
 });
+

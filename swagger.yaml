@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Phonezone
+  title: Sneakers
   description: 
   version: 0.0.1
   contact:
     email: karandemo577@gmail.com
 servers:
-  - url: http://localhost:4000/api
+  - url: http://localhost:4001/api
     description: Development Server
   - url: https://sneakerx-backend.onrender.com/api
     description: Production Server
@@ -36,10 +36,26 @@ paths:
                     type: boolean
                   message:
                     type: string
-  #user routes
+
+  #user routes start
   /user/signup:
-    put:
-      summary: Signup route
+    post:
+      summary: signup a new user
+      tags:
+        - user routes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
       responses:
         '200':
           description: return an object
@@ -52,3 +68,696 @@ paths:
                     type: boolean
                   message:
                     type: string
+                  user:
+                    type: object
+
+  /user/signin:
+    post:
+      summary: sign route
+      tags:
+        - user routes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: return an object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  user:
+                    type: object
+
+  /user/signout:
+      get:
+        summary: signout the user
+        tags:
+        - user routes
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+
+  /user/getprofile:
+      get:
+        summary: return the user detail
+        tags:
+        - user routes
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    user:
+                      type: object
+
+  /user/profile/update:
+      patch:
+        summary: return the updated user detail
+        tags:
+        - user routes
+        security:
+        - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  property:
+                    type: string
+                    enum:
+                      - name
+                      - email
+                  value:
+                    type: string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    user:
+                      type: object
+
+  /user/{id}:
+      get:
+        summary: Return the user detail
+        tags:
+        - user routes
+        security:
+        - BearerAuth: []
+        parameters:
+        - name: id
+          in: path
+          required: true
+          description: provide id(userId) in parameter.
+          schema:
+            type : string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    user:
+                      type: object
+      delete:
+        summary: return the deleted user details
+        tags:
+        - user routes(admin only)
+        security:
+        - BearerAuth: []
+        parameters:
+        - name: id
+          in: path
+          required: true
+          description: provide id(userId) in parameter.
+          schema:
+            type : string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    user:
+                      type: object
+
+  /user/forgotPassword:
+      post:
+        summary: send password reset link on your email
+        tags:
+        - user routes
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+
+  /user/resetPassword/{token}:
+      post:
+        summary: reset the password
+        tags:
+        - user routes
+        parameters:
+        - name: token
+          in: path
+          required: true
+          description: provide reset token from the recieved email.
+          schema:
+            type : string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  password:
+                    type: string
+                  confirmPassword:
+                    type: string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+                    user:
+                      type: object
+
+  /user/changePassword:
+      post:
+        summary: logged-in user can change the password
+        tags:
+        - user routes
+        security:
+        - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  password:
+                    type: string
+                  confirmPassword:
+                    type: string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+                    user:
+                      type: object
+
+  /user/all:
+      get:
+        summary: return the list of all the users
+        tags:
+        - user routes(admin only)
+        security:
+        - BearerAuth: []
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    users:
+                      type: array
+                      items:
+                        type: object
+
+  /user/update/{id}:
+      patch:
+        summary: return the updated user details
+        tags:
+        - user routes(admin only)
+        security:
+        - BearerAuth: []
+        parameters:
+        - name: id
+          in: path
+          required: true
+          description: provide id(userId) in parameter.
+          schema:
+            type : string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    user:
+                      type: object
+    # user routes end
+
+    # product routes start
+
+  /product/id/{productId}:
+      get:
+        summary: Return the product detail
+        tags:
+        - product routes
+        parameters:
+        - name: productId
+          in: path
+          required: true
+          description: provide productId in parameter.
+          schema:
+            type : string
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    product:
+                      type: object
+
+    # product routes end
+
+    # collection routes start
+
+  /category/all:
+      get:
+        summary: Return the list of all collection/category
+        tags:
+        - category routes
+        responses:
+          '200':
+            description: return an object
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+                    collections:
+                      type: array
+                      items:
+                        type: object
+
+  /category/products/{id}:
+      get:
+        summary: Return the list of all collection/category
+        tags:
+        - category routes
+        parameters:
+        - in: path
+          name: id
+          required: true
+          description: Collection ID to filter products.
+          schema:
+            type: string
+        - in: query
+          name: page
+          required: false
+          description: Page number for pagination.
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: limit
+          required: false
+          description: Maximum number of products per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: pricing
+          required: false
+          description: Sorting option for pricing.
+          schema:
+            type: string
+            enum: [asc, desc]
+        responses:
+          '200':
+            description: return an list of all product of that category
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    products:
+                      type: array
+                      items:
+                        type: object
+
+  /category/create:
+    post:
+      summary: Create a new collection/Category
+      description: Create a new collection/category with the provided name.
+      tags:
+        - category routes(admin only)
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Collection/Category created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  collection:
+                    type: object
+
+  /category/{id}:
+    put:
+      summary: Update a category/collection
+      description: Update the name of an existing category.
+      tags:
+        - category routes(admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the category to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Collection updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  collection:
+                    type: object
+      security:
+        - BearerAuth: []
+
+    delete:
+        summary: Delete a collection/category
+        description: Delete a collection by its ID.
+        tags:
+          - category routes(admin only)
+        parameters:
+          - in: path
+            name: id
+            required: true
+            description: ID of the collection/category to delete.
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Collection/category deleted successfully.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+        security:
+          - BearerAuth: []
+
+  # order routes start
+
+
+  # order routes end
+
+  # coupon routes start
+
+  /coupon/all:
+    get:
+      summary: Get all coupons
+      description: Retrieve all coupons from the database.
+      tags:
+        - coupon routes
+      responses:
+        '200':
+          description: A list of coupons.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  coupons:
+                    type: array
+                    items:
+                      type: object
+
+  /coupon/active:
+    get:
+      summary: Get all active coupons
+      description: Retrieve all active coupons from the database.
+      tags:
+        - coupon routes
+      responses:
+        '200':
+          description: A list of coupons.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  coupons:
+                    type: array
+                    items:
+                      type: object
+
+  /coupon/{id}:
+    get:
+      summary: Get coupon by ID
+      description: Retrieve a coupon by its ID.
+      tags:
+        - coupon routes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the coupon to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Coupon retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  coupon:
+                    type: object
+
+    delete:
+      summary: Delete a coupon
+      description: Delete a coupon by its ID.
+      tags:
+        - coupon routes(admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the coupon to delete.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Coupon deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+      security:
+        - BearerAuth: []
+
+  /coupon/create:
+    post:
+      summary: Create a new coupon
+      description: Create a new coupon with the provided name and discount.
+      tags:
+        - coupon routes(admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                discount:
+                  type: number
+      responses:
+        '200':
+          description: Coupon created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                  coupon:
+                    type: object
+      security:
+        - BearerAuth: []
+
+  /coupon/update/{id}:
+    put:
+      summary: Update a coupon
+      description: Update a coupon property by its ID.
+      tags:
+        - coupon routes(admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the coupon to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property:
+                  type: string
+                value:
+                  type: string
+      responses:
+        '200':
+          description: Coupon updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  coupon:
+                    type: object
+      security:
+        - BearerAuth: []
+
+

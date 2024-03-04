@@ -141,8 +141,6 @@ export const forgetPassword = asyncHandler(async(req, res) => {
     // validateBeforeSave is set to false - it will bypass all the validation
     await user.save({validateBeforeSave: false})
 
-    console.log(req.protocol)
-    console.log(req.get("X-Forwarded-Host"))
     const resetUrl = `${req.headers.origin}/resetPassword/${resetToken}`
     console.log(resetToken)
     const text = `Click on the link to reset the password - \n\n${resetUrl}\n\n`
@@ -329,10 +327,6 @@ export const getUserById = asyncHandler(async (req, res) => {
  ***************************************************************/
 
  export const getAllUsers = asyncHandler(async (req, res) => {
-    if(!(req.user.role === "ADMIN")) {
-        throw new CustomError("Protected route, only admin can access this route", 401)
-    }
-
     const users = await User.find()
 
     if(!users.length) {

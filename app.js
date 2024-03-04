@@ -20,16 +20,13 @@ const file  = fs.readFileSync('./swagger.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
 
 
-
-
 // middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
-    origin: "https://sneakerx-frontend.vercel.app",
-    // origin: "http://localhost:5173",
+    origin: ["https://sneakerx-frontend.vercel.app", "https://sneakerx-admin.vercel.app"],
+    // origin: ["http://localhost:5173", "http://localhost:3000"],
     credentials: true,
-
 }))
 
 app.use(cookieParser())

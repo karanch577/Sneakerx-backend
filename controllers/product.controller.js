@@ -44,10 +44,14 @@ export const createProduct = asyncHandler(async (req, res) => {
             !fields.style ||
             !fields.sizes ||
             !fields.collectionId) {
-                throw new CustomError("Fields are required", 500)
-            }
+            throw new CustomError("Fields are required", 500)
+        }
 
-            const now = new Date()
+        if(!files.files) {
+            throw new CustomError("Photos are required", 500)
+        }
+        
+        const now = new Date()
         // Promise.all() takes iterable of promises and return a single promise
         let imgUrlArrRes = Promise.all(
             // Object.values will return an array containing the values of the passed object

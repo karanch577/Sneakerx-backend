@@ -150,7 +150,13 @@ export const paymentVerification = asyncHandler(async (req, res) => {
         })
 
 
-        product.sold = product.sold + item?.count
+        product.sold = [
+            ...product.sold,
+            {
+                size: item.size,
+                quantity: item.count
+            }
+        ]
 
         await product.save()
     }

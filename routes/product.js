@@ -27,5 +27,4 @@ router.put("/updatePhotos/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), 
 router.delete("/delete/:id", isLoggedIn, verifyPermission([authRoles.ADMIN]), deleteProduct)
 
 
-
 export default router;

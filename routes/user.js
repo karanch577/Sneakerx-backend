@@ -23,7 +23,7 @@ import authRoles from "../utils/authRoles.js";
 router.post("/signup", signup)
 router.post("/signin", signin)
 router.get("/signout", signout)
-router.get("/all", isLoggedIn, getAllUsers)
+router.get("/all", isLoggedIn,verifyPermission([authRoles.ADMIN]), getAllUsers)
 router.get("/getprofile", isLoggedIn, getProfile)
 router.patch("/update/:id", isLoggedIn, verifyPermission([authRoles.ADMIN]), updateProfileByAdmin)
 router.patch("/profile/update", isLoggedIn, updateProfile)
