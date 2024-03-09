@@ -9,7 +9,6 @@ import collectionRoutes from "./routes/collection.js";
 import couponRoutes from "./routes/coupon.js";
 import productRoutes from "./routes/product.js";
 import orderRoutes from "./routes/order.js";
-import googleOauthRoutes from "./routes/googleOauth.js";
 
 import swaggerUi from 'swagger-ui-express';
 import fs from "fs";
@@ -39,7 +38,6 @@ app.use("/api/category", collectionRoutes)
 app.use("/api/coupon", couponRoutes)
 app.use("/api/product", productRoutes)
 app.use("/api/order", orderRoutes)
-app.use("/api/google", googleOauthRoutes)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

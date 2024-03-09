@@ -257,17 +257,38 @@ export const getOrdersStatus = asyncHandler(async (req, res) => {
  * @returns Object with the order's status
  *********************************************************/
 
- export const getAllOrders = asyncHandler(async (_req, res) => {
+ export const getAllOrders = asyncHandler(async (req, res) => {
+    const { page, limit = 10 } = req.query
 
-   const orders = await Order.find().sort({createdAt: "desc"}).populate("user", "name")
-    if(!orders) {
-        throw new CustomError("No orders found", 400)
+    if(!page) {
+        const orders = await Order.find().sort({createdAt: "desc"}).populate("user", "name")
+        if(orders.length === 0) {
+            throw new CustomError("No orders found", 400)
+        }
+       
+        return res.status(200).json({
+            success: true,
+            orders
+        })
     }
-   
-    res.status(200).json({
-        success: true,
-        orders
-    })
+
+    const skipCount = (page - 1) * limit;
+
+    const orders = await Order.find().sort({id: -1}).skip(skipCount).limit(limit)
+  
+    if(orders.length === 0) {
+      throw new CustomError("No order found", 404)
+    }
+  
+    const totalItem = await Order.countDocuments()
+  
+    return res.status(200).json({
+      success: true,
+      message: "An array of orders",
+      orders,
+      currentPage: +page,
+      totalPage: Math.ceil(totalItem / limit)
+    });
 })
 
 /**********************************************************

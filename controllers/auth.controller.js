@@ -3,10 +3,6 @@ import asyncHandler from "../services/asyncHandler.js";
 import CustomError from "../utils/customError.js";
 import { mailHelper } from "../utils/mailHelper.js";
 import crypto from "crypto";
-import JWT from "jsonwebtoken";
-import config from "../config/index.js";
-import axios from "axios";
-import qs from "qs";
 
 
 const cookieOptions = {
@@ -108,6 +104,8 @@ export const signin = asyncHandler(async (req, res) => {
 export const signout = asyncHandler(async(req, res) => {
     res.cookie("token", null,{
         expires: new Date(Date.now()),
+        sameSite: 'none',
+        secure: true,
         httpOnly: true
     })
 
@@ -327,15 +325,37 @@ export const getUserById = asyncHandler(async (req, res) => {
  ***************************************************************/
 
  export const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await User.find()
 
-    if(!users.length) {
-        throw new CustomError("users not found in DB", 404)
+    const { page, limit = 10 } = req.query;
+
+    if(!page) {
+        const users = await User.find()
+
+        if(!users.length) {
+            throw new CustomError("users not found in DB", 404)
+        }
+    
+        return res.status(200).json({
+            success: true,
+            users
+        })
+    }
+    
+    const skipCount = (page - 1) * limit;
+
+    const users = await User.find().sort({id: -1}).skip(skipCount).limit(limit)
+
+    if(users.length === 0) {
+        throw new CustomError("No user found", 404)
     }
 
-    res.status(200).json({
+    const totalItem = await User.countDocuments()
+
+    return res.status(200).json({
         success: true,
-        users
+        users,
+        currentPage: +page,
+        totalPage: Math.ceil(totalItem / limit)
     })
 })
 
@@ -399,103 +419,3 @@ export const getUserById = asyncHandler(async (req, res) => {
     })
 })
 
-/***************************************************************
- * @SEND_TO_GOOGLE_CONSENT_SCREEN
- * @REQUEST_TYPE PUT
- * @route http://localhost:4000/api/user/:id
- * @description get the user from db and send it
- * @returns success - user
- ***************************************************************/
-
-export const getGoogleOauthUrl = asyncHandler((req, res) => {
-    const baseUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-
-    const options = {
-        redirect_uri: "https://iwebtrends.com/api/google/callback",
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        access_type: "offline",
-        response_type: "code",
-        prompt: "consent",
-        scope: [
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/userinfo.email",
-        ].join(" ")
-    }
-
-    const qs = new URLSearchParams(options)
-
-    const Oauthurl =  `${baseUrl}?${qs.toString()}`;
-
-    return res.status(200).json({
-        success: true,
-        Oauthurl
-    })
-
-})
-
-export const getCode = asyncHandler(async (req, res) => {
-    const code = req.query.code;
-    //  exchange the code with acess token and acess id
-
-    const url = "https://oauth2.googleapis.com/token";
-
-    const values = {
-        code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: "https://iwebtrends.com/api/google/callback",
-        grant_type: "authorization_code"
-    }
-
-    const resp = await axios.post(url, qs.stringify(values),
-    {
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-    })
-
-    const {id_token, access_token} = resp.data;
-
-
-    const decode = JWT.decode(id_token)
-
-    if(decode.email) {
-        // qwery the user
-        const existingUser = await User.findOne({socialId: decode.sub})
-        if(existingUser) {
-        const token = JWT.sign({_id: existingUser._id}, config.JWT_SECRET, {expiresIn: config.JWT_EXPIRY})
-        res.cookie("token", token, cookieOptions)
-
-        res.redirect("https://phonezone.vercel.app")
-        } else {
-            const newUser = new User({
-                name: decode.name,
-                email: decode.email,
-                source: "google",
-                socialId: decode.sub
-            })
-
-            const savedUser = await newUser.save({validateBeforeSave: false})
-
-            if(savedUser) {
-                const token = JWT.sign({_id: newUser._id}, config.JWT_SECRET, {expiresIn: config.JWT_EXPIRY})
-                res.cookie("token", token, cookieOptions)
-
-                res.redirect("https://phonezone.vercel.app")
-                
-            }
-        }
-    }
-})
-
-
-export const sendGoogleUser = asyncHandler(async(req, res) => {
-    if(req.user) {
-        res.status(200).json({
-            success: true,
-            user: req.user
-        })
-    }
-    throw new CustomError("Protected Route")
-    
-})

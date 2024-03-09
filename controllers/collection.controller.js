@@ -41,16 +41,38 @@ export const createCollection = asyncHandler(async (req, res) => {
  ***************************************************************/
 
 export const getCollections = asyncHandler(async (req, res) => {
-  const collections = await Collection.find({});
-  if (collections.length) {
-    res.status(200).json({
-      success: true,
-      message: "An array of all collections",
-      collections,
-    });
-  } else {
-    throw new CustomError("No collection available in DB", 401);
+  const { page, limit = 10 } = req.query
+
+  if(!page) {
+    const collections = await Collection.find({});
+    if (collections.length) {
+      return res.status(200).json({
+        success: true,
+        message: "An array of all collections",
+        collections,
+      });
+    } else {
+      throw new CustomError("No collection available in DB", 401);
+    }
   }
+
+  const skipCount = (page - 1) * limit;
+
+  const collections = await Collection.find().sort({id: -1}).skip(skipCount).limit(limit)
+
+  if(collections.length === 0) {
+    throw new CustomError("No collection found", 404)
+  }
+
+  const totalItem = await Collection.countDocuments()
+
+  return res.status(200).json({
+    success: true,
+    message: "An array of collections",
+    collections,
+    currentPage: +page,
+    totalPage: Math.ceil(totalItem / limit)
+  });
 });
 
 /***************************************************************

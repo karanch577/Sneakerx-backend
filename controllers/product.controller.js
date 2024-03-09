@@ -250,7 +250,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 export const getAllProducts = asyncHandler(async (_req, res) => {
     const products = await Product.find().sort({createdAt: "desc"})
 
-    if(!products) {
+    if(products.length === 0) {
         throw new CustomError("No product found in DB", 400)
     }
 
@@ -276,13 +276,17 @@ export const getAllProducts = asyncHandler(async (_req, res) => {
     // sorting the array with _id: -1 to get the recently added product at the first position and so on.
     const products = await Product.find().sort({_id: -1}).skip(skipCount).limit(limit)
 
-    if(!products) {
+    if(products.length === 0) {
         throw new CustomError("No product found in DB", 400)
     }
 
+    const totalItem = await Product.countDocuments()
+
     return res.status(200).json({
         success: true,
-        products
+        products,
+        currentPage: +page,
+        totalPage: Math.ceil(totalItem / limit)
     })
 })
 /**********************************************************
@@ -305,7 +309,7 @@ export const getAllProducts = asyncHandler(async (_req, res) => {
     
     const products = await Product.find({collectionId: categoryId}).skip(skipCount).limit(limit)
 
-    if(!products) {
+    if(products.length === 0) {
         throw new CustomError("No product found in DB", 400)
     }
 

@@ -19,8 +19,8 @@ router.post("/create",isLoggedIn, verifyPermission([authRoles.ADMIN]), createCou
 router.get("/all", getAllCoupons)
 router.delete("/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), deleteCoupon)
 router.get("/active", getAllActiveCoupons)
-router.get("/:id", getCouponById)
 router.put("/update/:id", isLoggedIn, verifyPermission([authRoles.ADMIN]), updateCoupon)
 
+router.get("/:id", getCouponById)
 
 export default router;

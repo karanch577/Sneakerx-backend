@@ -34,7 +34,7 @@ export const createCoupon = asyncHandler(async (req, res) => {
     }
 
     return res.status(200).json({
-        status: true,
+        success: true,
         coupon
     })
 })
@@ -127,14 +127,38 @@ export const deleteCoupon = asyncHandler(async (req, res) => {
 
 export const getAllCoupons = asyncHandler(async (req, res) => {
 
-    const coupons = await Coupon.find()
-    if(coupons.length == 0) {
-        throw new CustomError("No coupon found in db", 400)
+    const { page, limit = 10 } = req.query
+
+    // sending all coupons when page is not sent
+    if(!page) {
+        const coupons = await Coupon.find()
+        if(coupons.length === 0) {
+            throw new CustomError("No coupon found in db", 400)
+        }
+    
+        return res.status(200).json({
+            success: true,
+            coupons
+        })
     }
+
+    const skipCount = (page - 1) * limit
+
+    // sorting the coupons with -1 
+
+    const coupons = await Coupon.find().sort({_id: -1}).skip(skipCount).limit(limit)
+
+    if(coupons.length === 0) {
+        throw new CustomError("Coupon not found in DB", 404)
+    }
+
+    const totalItem = await Coupon.countDocuments()
 
     return res.status(200).json({
         success: true,
-        coupons
+        coupons,
+        currentPage: +page,
+        totalPage: Math.ceil(totalItem / limit)
     })
 })
 
@@ -146,14 +170,36 @@ export const getAllCoupons = asyncHandler(async (req, res) => {
  *********************************************************/
 
 export const getAllActiveCoupons = asyncHandler(async (req, res) => {
-    const coupons = await Coupon.find({active: true})
-    if(coupons.length == 0) {
-        throw new CustomError("No coupon found in db", 400)
+
+    const { page, limit = 10 } = req.query
+
+    if(!page) {
+        const coupons = await Coupon.find({active: true})
+        if(coupons.length == 0) {
+            throw new CustomError("No coupon found in db", 400)
+        }
+    
+        return res.status(200).json({
+            success: true,
+            coupons
+        })
     }
+
+    const skipCount = (page - 1) * limit;
+
+    const coupons = await Coupon.find({active: true}).sort({id: -1}).skip(skipCount).limit(limit)
+
+    if(coupons.length === 0) {
+        throw new CustomError("No active coupons found", 404)
+    }
+
+    const totalItem = await Coupon.countDocuments()
 
     return res.status(200).json({
         success: true,
-        coupons
+        coupons,
+        currentPage: +page,
+        totalPage: Math.ceil(totalItem / limit)
     })
 })
 
