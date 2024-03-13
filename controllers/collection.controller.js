@@ -58,7 +58,7 @@ export const getCollections = asyncHandler(async (req, res) => {
 
   const skipCount = (page - 1) * limit;
 
-  const collections = await Collection.find().sort({id: -1}).skip(skipCount).limit(limit)
+  const collections = await Collection.find().sort({ createdAt: -1 }).skip(skipCount).limit(limit)
 
   if(collections.length === 0) {
     throw new CustomError("No collection found", 404)

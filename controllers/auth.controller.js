@@ -343,7 +343,7 @@ export const getUserById = asyncHandler(async (req, res) => {
     
     const skipCount = (page - 1) * limit;
 
-    const users = await User.find().sort({id: -1}).skip(skipCount).limit(limit)
+    const users = await User.find().sort({ createdAt: -1 }).skip(skipCount).limit(limit)
 
     if(users.length === 0) {
         throw new CustomError("No user found", 404)
@@ -381,6 +381,7 @@ export const getUserById = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         success: true,
+        message: "User deleted successfully",
         user
     })
 })

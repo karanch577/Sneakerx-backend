@@ -49,26 +49,14 @@ export const createCoupon = asyncHandler(async (req, res) => {
 
 export const updateCoupon = asyncHandler(async (req, res) => {
     const {id} = req.params
-    let {property, value} = req.body
-
-    // if the property is status change it to active
-
-    if(property === "status") {
-        property = "active"
-        value = Boolean(value)
-    } else if(property === "discount") {
-        value = Number(value)
-    } else if(property === "name") {
-        property = "code"
-        value = value.toUpperCase()
-    }
+    let {discount, code, active} = req.body
     
     if(!id) {
         throw new CustomError("id is required", 400)
     }
 
-    if(!property && !value) {
-        throw new CustomError("property and value is required", 400)
+    if(!discount && !code && !active) {
+        throw new CustomError("name, code and active are required", 400)
     }
 
     const coupon = await Coupon.findById(id)
@@ -77,7 +65,9 @@ export const updateCoupon = asyncHandler(async (req, res) => {
         throw new CustomError("Coupon not found in db", 404)
     }
 
-    coupon[property] = value    
+    coupon.discount = +discount;
+    coupon.code = String(code);
+    coupon.active = Boolean(active);
 
     await coupon.save()
 
@@ -99,7 +89,7 @@ export const deleteCoupon = asyncHandler(async (req, res) => {
     const { id } = req.params
     
     if(!id) {
-        throw new CustomError("code is required", 400)
+        throw new CustomError("id is required", 400)
     }
 
     const response = await Coupon.findByIdAndDelete(id)
@@ -146,7 +136,7 @@ export const getAllCoupons = asyncHandler(async (req, res) => {
 
     // sorting the coupons with -1 
 
-    const coupons = await Coupon.find().sort({_id: -1}).skip(skipCount).limit(limit)
+    const coupons = await Coupon.find().sort({ createdAt: -1 }).skip(skipCount).limit(limit)
 
     if(coupons.length === 0) {
         throw new CustomError("Coupon not found in DB", 404)
@@ -187,7 +177,7 @@ export const getAllActiveCoupons = asyncHandler(async (req, res) => {
 
     const skipCount = (page - 1) * limit;
 
-    const coupons = await Coupon.find({active: true}).sort({id: -1}).skip(skipCount).limit(limit)
+    const coupons = await Coupon.find({active: true}).sort({ createdAt: -1 }).skip(skipCount).limit(limit)
 
     if(coupons.length === 0) {
         throw new CustomError("No active coupons found", 404)

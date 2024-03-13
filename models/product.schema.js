@@ -12,12 +12,12 @@ const productSchema = new mongoose.Schema(
         price: {
             type: Number,
             required: [true, "Price is required"],
-            maxLength: [8, "maxlength is 120 character"]
+            maxLength: [12, "maxlength is 120 character"]
         },
         sellingPrice: {
             type: Number,
             required: [true, "Selling price is required"],
-            maxLength: [8, "maxlength is 120 character"]
+            maxLength: [12, "maxlength is 120 character"]
         },
         description: {
             type: String,
@@ -39,7 +39,7 @@ const productSchema = new mongoose.Schema(
                     required: true
                 },
                 quantity: {
-                    type: String,
+                    type: Number,
                     required: true,
                     default: 0
                 }
@@ -60,11 +60,12 @@ const productSchema = new mongoose.Schema(
                     required: true
                 },
                 quantity: {
-                    type: String,
+                    type: Number,
                     required: true,
                     default: 0
                 }
             }],
+            default: [],
             required: true,
         },
         collectionId: {

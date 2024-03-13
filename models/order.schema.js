@@ -15,7 +15,7 @@ const orderSchema = mongoose.Schema(
                     },
                     count: Number,
                     size: String,
-                    price: String
+                    price: Number
                 }
             ],
             required: true

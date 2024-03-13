@@ -151,7 +151,7 @@ export const paymentVerification = asyncHandler(async (req, res) => {
 
 
         product.sold = [
-            ...product.sold,
+            ...(product.sold ? product.sold : []),
             {
                 size: item.size,
                 quantity: item.count
@@ -274,7 +274,7 @@ export const getOrdersStatus = asyncHandler(async (req, res) => {
 
     const skipCount = (page - 1) * limit;
 
-    const orders = await Order.find().sort({id: -1}).skip(skipCount).limit(limit)
+    const orders = await Order.find().sort({ createdAt: -1 }).skip(skipCount).limit(limit)
   
     if(orders.length === 0) {
       throw new CustomError("No order found", 404)

@@ -18,6 +18,7 @@ import config from "../config/index.js";
  *********************************************************/
 
 export const createProduct = asyncHandler(async (req, res) => {
+
     const form = formidable({
         multiples: true,
         keepExtensions: true
@@ -79,6 +80,7 @@ export const createProduct = asyncHandler(async (req, res) => {
         // add the product to db
         const product = await Product.create({
             ...fields,
+            sizes: Object.values(fields.sizes),
             _id: productId,
             photos: imgUrlArr
         })
@@ -103,7 +105,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 
         }
         return res.status(200).json({
-            status: true,
+            success: true,
             product
         })
     })
@@ -232,7 +234,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
         }
         return res.status(200).json({
-        status: true,
+        success: true,
         product
         })
        
@@ -273,8 +275,8 @@ export const getAllProducts = asyncHandler(async (_req, res) => {
     const limit = Number(req.query.limit) || 9
     const skipCount = ( page - 1) * limit
 
-    // sorting the array with _id: -1 to get the recently added product at the first position and so on.
-    const products = await Product.find().sort({_id: -1}).skip(skipCount).limit(limit)
+    // sorting the array with createdAt: -1 to get the recently added product at the first position and so on.
+    const products = await Product.find().sort({ createdAt: -1 }).skip(skipCount).limit(limit)
 
     if(products.length === 0) {
         throw new CustomError("No product found in DB", 400)
