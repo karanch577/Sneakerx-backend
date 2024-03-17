@@ -274,7 +274,7 @@ export const getOrdersStatus = asyncHandler(async (req, res) => {
 
     const skipCount = (page - 1) * limit;
 
-    const orders = await Order.find().sort({ createdAt: -1 }).skip(skipCount).limit(limit)
+    const orders = await Order.find().sort({ createdAt: -1 }).populate("user", "name").skip(skipCount).limit(limit)
   
     if(orders.length === 0) {
       throw new CustomError("No order found", 404)
@@ -335,6 +335,31 @@ export const editOrder = asyncHandler(async (req, res) => {
     status ? order.status = status : ""
 
     await order.save()
+
+    res.status(200).json({
+        success: true,
+        order
+    })
+})
+
+/**********************************************************
+ * @DELETE_ORDER
+ * @route https://localhost:5000/api/order/:id
+ * @description Controller used to delete order
+ * @returns Object with deleted order
+ *********************************************************/
+
+export const deleteOrder = asyncHandler(async (req, res) => {
+    const {id} = req.params
+    if(!id) {
+        throw new CustomError("Id is required")
+    }
+
+    const order = await Order.findByIdAndDelete(id)
+
+    if(!order) {
+        throw new CustomError("Error in deleting in order", 404)
+    }
 
     res.status(200).json({
         success: true,

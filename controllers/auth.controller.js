@@ -1,5 +1,6 @@
 import User from "../models/user.schema.js";
 import asyncHandler from "../services/asyncHandler.js";
+import authRoles from "../utils/authRoles.js";
 import CustomError from "../utils/customError.js";
 import { mailHelper } from "../utils/mailHelper.js";
 import crypto from "crypto";
@@ -395,7 +396,6 @@ export const getUserById = asyncHandler(async (req, res) => {
  ***************************************************************/
 
  export const updateProfileByAdmin = asyncHandler(async (req, res) => {
-     console.log(req.user)
     const {id} = req.params
     const {name, email, role} = req.body
 
@@ -416,6 +416,64 @@ export const getUserById = asyncHandler(async (req, res) => {
     }
     res.status(200).json({
         success: true,
+        user
+    })
+})
+
+/***************************************************************
+ * @GET_USER_ROLES
+ * @REQUEST_TYPE GET
+ * @route http://localhost:4000/api/user/role
+ * @description send the user's role available
+ * @returns success - role
+ ***************************************************************/
+
+ export const getUserRoles = asyncHandler(async (_req, res) => {
+
+    res.status(200).json({
+        success: true,
+        roles: Object.values(authRoles)
+    })
+})
+
+/***************************************************************
+ * @CREATE_USER_BY_ADMIN
+ * @REQUEST_TYPE POST
+ * @route http://localhost:4000/api/user/create
+ * @description Only admin can create user
+ * @returns success - user
+ ***************************************************************/
+
+ export const createUserByAdmin = asyncHandler(async (req, res) => {
+    const { name, email, password, role } = req.body;
+
+    // checking all the fields
+
+    if(!name && !email && !password && !role) {
+        throw new CustomError("All fields are required", 400)
+    }
+
+    // check if user exist
+    const existingUser = await User.findOne({email})
+
+    if(existingUser) {
+        throw new CustomError("User already registered", 400)
+    }
+
+    const user = await User.create({
+        name,
+        email,
+        password, 
+        role
+    })
+
+    // above since we have created and saved the user in the DB, password field is also returned in user
+    // select false will only deselect on the time of query
+    user.password = undefined
+
+    return res.status(200).json({
+        success: true,
+        message: "User created successfully",
         user
     })
 })

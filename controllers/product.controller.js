@@ -53,11 +53,12 @@ export const createProduct = asyncHandler(async (req, res) => {
         }
         
         const now = new Date()
+        const filesArr = Array.isArray(files.files) ? files.files : [files.files];
         // Promise.all() takes iterable of promises and return a single promise
         let imgUrlArrRes = Promise.all(
             // Object.values will return an array containing the values of the passed object
             // we have used async/await in the callback of the map, it will return array of promises
-            Object.values(files.files).map(async(img, index) => {
+            Object.values(filesArr).map(async(img, index) => {
                 const imgData = fs.readFileSync(img.filepath)
                 const upload = await s3FileUpload(
                     {
@@ -121,29 +122,91 @@ export const createProduct = asyncHandler(async (req, res) => {
  *********************************************************/
 
 export const updateProduct = asyncHandler(async (req, res) => {
-    const {id} = req.params
-    const {property, value} = req.body
+    const {id: productId} = req.params;
+    let imgUrlArr = []
 
-    if(!(property && value)) {
-        throw new CustomError("property and value is mandatory", 401)
-    }
-    
-    const product = await Product.findById(id).populate("collectionId", "name")
-    if(!product) {
+    const form = formidable({
+        multiples: true,
+        keepExtensions: true
+    })
+
+    form.parse(req, async (err, fields, files) => {
+        if(err) {
+            throw new CustomError(err.message || "error in form parsing", 500)
+        }
+
+        // return res.json({
+        //     fields,
+        //     files
+        // })
+
+        // checking for input fields
+        if(!fields.name ||
+            !fields.price ||
+            !fields.sellingPrice ||
+            !fields.description ||
+            !fields.colourShown ||
+            !fields.style ||
+            !fields.sizes ||
+            !fields.collectionId) {
+            throw new CustomError("Fields are required", 500)
+        }
+
+        if(files.files) {
+        const now = new Date()
+        const filesArr = Array.isArray(files.files) ? files.files : [files.files];
+        // Promise.all() takes iterable of promises and return a single promise
+        let imgUrlArrRes = Promise.all(
+            
+            // we have used async/await in the callback of the map, it will return array of promises
+            Object.values(filesArr).map(async(img, index) => {
+                const imgData = fs.readFileSync(img.filepath)
+                const upload = await s3FileUpload(
+                    {
+                        bucketName: config.S3_BUCKET_NAME,
+                        key: `product/${productId}/img_updated_${index + 1}/${now.getTime()}`,
+                        body: imgData,
+                        contentType: img.mimetype
+                        
+                    }
+                )
+                if(upload){
+                return {
+                    secure_url: `https://${config.S3_BUCKET_NAME}.s3.amazonaws.com/product/${productId}/img_updated_${index + 1}/${now.getTime()}`
+                }
+            }
+            })
+        )
+
+        imgUrlArr = await imgUrlArrRes
+        }
+
+        const product = await Product.findById(productId)
+        if(!product) {
         throw new CustomError("error in fetching the product", 401)
-    }
+        }
 
-    product[property] = value
+        product.name = fields.name;
+        product.price = fields.price;
+        product.sellingPrice = fields.sellingPrice;
+        product.description = fields.description;
+        product.colourShown = fields.colourShown;
+        product.style = fields.style;
+        product.sizes = fields.sizes;
+        product.collectionId = fields.collectionId;
+        product.photos = [...product.photos, ...imgUrlArr]
+        product.sold = fields.sold ?? product.sold
 
-    const updatedProduct = await product.save()
+        const savedProduct = await product.save()
 
-    if(!updatedProduct) {
-        throw new CustomError("Failed in saving the product |update", 401)
-    }
+        if(!savedProduct) {
+            throw new CustomError("Error in saving the product", 400)
+        }
 
-    res.status(200).json({
-        success: true,
-        updatedProduct
+        return res.status(200).json({
+            success: true,
+            product: savedProduct
+        })
     })
 })
 
@@ -158,86 +221,45 @@ export const updateProduct = asyncHandler(async (req, res) => {
  export const updateProductImg = asyncHandler(async (req, res) => {
     const {id} = req.params
 
-    const form = formidable({
-        multiples: true,
-        keepExtensions: true
-    })
+    if(!id) {
+        throw new CustomError("productId is required", 400)
+    }
 
-    let imgUrlArr = []
-
-    form.parse(req, async (err, fields, files) => {
-        if(err) {
-            throw new CustomError(err.message || "error in form parsing", 500)
-        }
-
-        const removedImgArr = JSON.parse(fields.removedImg)
-        if(removedImgArr.length){
-            // delete the images
-            await Promise.all(removedImgArr.map(async item => {
-                // extract the key from the secure_url
-                let url = item.secure_url
-                let pathName = new URL(url).pathname
-                let finalKey = pathName.substring(pathName.indexOf("product"))
-                console.log(finalKey)
+    const { photos } = req.body;
     
-            await deleteFile({
-                    bucketName: config.S3_BUCKET_NAME,
-                    key: finalKey
-                })
-            }))
-        }
-       
-        // handling the files
-        let imgFiles = Object.values(files)
+    if(!photos || !photos.length) {
+        throw new CustomError("Photos are required", 400)
+    }
 
+    await Promise.all(photos.map(async item => {
+        // extract the key from the secure_url
+        let url = item.secure_url
+        let pathName = new URL(url).pathname
+        let finalKey = pathName.substring(pathName.indexOf("product"))
+        console.log("final key", finalKey)
 
-        if(imgFiles.length) {
-            const now = new Date()
-            imgUrlArr = await Promise.all(imgFiles.map(async (img, i) => {
-                const imgData = fs.readFileSync(img.filepath)
-                const upload = await s3FileUpload(
-                    {
-                        bucketName: config.S3_BUCKET_NAME,
-                        key: `product/${id}/img_${now.getTime()}_${i}`,
-                        body: imgData,
-                        contentType: img.mimetype
-                        
-                    }
-                )
-                return {
-                    secure_url: upload.Location
-                }
-            }))
-        }
-        
-        const product = await Product.findById(id).populate("collectionId", "name")
-
-        // add the newly added images url and remove the deleted one
-
-        let result = removedImgArr.length ? [] : product.photos
-        if(removedImgArr.length) {
-            let previousImg = product.photos
-
-            result = previousImg.filter(img => {
-                let index = removedImgArr.findIndex(item => item.secure_url === img.secure_url)
-                return index === -1
-            })
-        }
-
-        product.photos = [...result, ...imgUrlArr]
-
-        await product.save()
-
-        if(!product) {
-       
-        throw new CustomError("Error in updating Product", 400)
-
-        }
-        return res.status(200).json({
-        success: true,
-        product
+    await deleteFile({
+            bucketName: config.S3_BUCKET_NAME,
+            key: finalKey
         })
-       
+    }))
+
+    const product = await Product.findById(id).populate("collectionId", "name")
+
+    // remove the deleted photos
+    let updatedPhoto = product.photos.filter(photo => !photos.some(item => item.secure_url === photo.secure_url))
+
+    product.photos = updatedPhoto;
+
+    const updatedProduct = await product.save()
+
+    if(!updatedProduct) {
+    throw new CustomError("Error in updating Product", 400)
+    }
+
+    return res.status(200).json({
+    success: true,
+    product: updatedProduct
     })
 })
 
@@ -390,7 +412,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     const product = await Product.findByIdAndDelete(id)
 
     if(!product) {
-        throw new CustomError("product not deleted", 401)
+        throw new CustomError("Error in product deletion", 401)
     }
     res.status(200).json({
         success: true,

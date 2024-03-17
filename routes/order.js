@@ -9,6 +9,7 @@ import {
   getAllOrders,
   getOrder,
   editOrder,
+  deleteOrder,
 } from "../controllers/order.controller.js";
 
 import { isLoggedIn, verifyPermission } from "../middlewares/auth.middleware.js";
@@ -21,11 +22,12 @@ router.get("/getkey",isLoggedIn, getKey)
 router.post("/checkout",isLoggedIn, generateRazorpayOrderId)
 router.post("/paymentverification",isLoggedIn, paymentVerification)
 router.get("/user/all",isLoggedIn, getOrders)
+router.delete("/:orderId",isLoggedIn, verifyPermission([authRoles.ADMIN]), deleteOrder)
 router.delete("/cancel/:orderId",isLoggedIn, cancelOrder)
 router.get("/status",isLoggedIn, getOrdersStatus)
 router.get("/all",isLoggedIn, getAllOrders)
 router.get("/id/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), getOrder)
-router.put("/edit/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]),editOrder)
+router.patch("/update/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]),editOrder)
 
 
 

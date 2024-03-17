@@ -23,8 +23,8 @@ router.get("/search", getSearchedProducts)
 router.get("/:category", getProductsByCategory)
 router.post("/create",isLoggedIn, verifyPermission([authRoles.ADMIN]), createProduct)
 router.patch("/update/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), updateProduct)
-router.put("/updatePhotos/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), updateProductImg)
-router.delete("/delete/:id", isLoggedIn, verifyPermission([authRoles.ADMIN]), deleteProduct)
+router.patch("/updatePhotos/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), updateProductImg)
+router.delete("/:id", isLoggedIn, verifyPermission([authRoles.ADMIN]), deleteProduct)
 
 
 export default router;
