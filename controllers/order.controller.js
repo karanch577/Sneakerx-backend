@@ -8,6 +8,7 @@ import CustomError from "../utils/customError.js";
 import crypto from "crypto";
 import paymentStatus from "../utils/paymentStatus.js";
 import orderStatus from "../utils/orderStatus.js";
+import moment from "moment";
 
 
 /**********************************************************
@@ -365,4 +366,93 @@ export const deleteOrder = asyncHandler(async (req, res) => {
         success: true,
         order
     })
+})
+
+/**********************************************************
+ * @GET_TOTAL_SALES
+ * @route https://localhost:5000/api/order/total-sales
+ * @description Controller used to get total sales by range
+ * @returns total sales between the given range
+ *********************************************************/
+
+export const getTotalSales = asyncHandler(async (req, res) => {
+    const { range } = req.query
+    const currentDate = new Date();
+    let startDate;
+    let pipeline;
+
+    // sending lifetime data
+    if(!range) {
+        pipeline = [
+            {
+            $match: {
+                status: { $nin: ["PENDING", "CANCELLED"] }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                totalSales: { $sum: "$amount" }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                totalSales: 1
+              }
+            }
+          ];
+    }
+
+    if(range) {
+        switch (range) {
+            case "last7days":
+                startDate = moment(currentDate).subtract(7, 'days').startOf('day').toDate();
+                break;
+
+            case "last30days":
+                startDate = moment(currentDate).subtract(30, 'days').startOf('day').toDate();
+                break;
+
+            case "last6months":
+                startDate = moment(currentDate).subtract(6, 'months').startOf('month').toDate();
+                break;
+
+            case "last12months":
+                startDate = moment(currentDate).subtract(12, 'months').startOf('month').toDate();
+                break;
+        
+            default:
+                break;
+        }
+
+        pipeline = [
+            {
+              $match: {
+                createdAt: { $gte: startDate },
+                status: { $nin: ["PENDING", "CANCELLED"] }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                totalSales: { $sum: "$amount" }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                totalSales: 1
+              }
+            }
+          ];
+    }
+
+    const sales = await Order.aggregate(pipeline)
+
+    return res.status(200).json({
+        success: true,
+        sales
+    })
+
 })

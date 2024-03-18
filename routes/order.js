@@ -10,6 +10,7 @@ import {
   getOrder,
   editOrder,
   deleteOrder,
+  getTotalSales,
 } from "../controllers/order.controller.js";
 
 import { isLoggedIn, verifyPermission } from "../middlewares/auth.middleware.js";
@@ -28,7 +29,7 @@ router.get("/status",isLoggedIn, getOrdersStatus)
 router.get("/all",isLoggedIn, getAllOrders)
 router.get("/id/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]), getOrder)
 router.patch("/update/:id",isLoggedIn, verifyPermission([authRoles.ADMIN]),editOrder)
-
+router.get("/total-sales", isLoggedIn, verifyPermission([authRoles.ADMIN]), getTotalSales)
 
 
 export default router;
