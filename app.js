@@ -23,7 +23,7 @@ const swaggerDocument = YAML.parse(file)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
-    origin: ["https://sneakerx-frontend.vercel.app", "https://sneakerx-admin.vercel.app"],
+    origin: ["https://sneakerx-frontend.vercel.app", "https://sneakerx-admin.vercel.app", "https://www.sneakerx.xyz", "https://sneakerx.xyz"],
     // origin: ["http://localhost:5173", "http://localhost:3000"],
     credentials: true,
 }))
