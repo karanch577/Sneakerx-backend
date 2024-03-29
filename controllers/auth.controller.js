@@ -46,9 +46,9 @@ export const signup = asyncHandler(async(req, res) => {
     // select false will only deselect on the time of query
     user.password = undefined
 
-    res.cookie("token", token, cookieOptions)
+    
 
-    return res.status(200).json({
+    return res.status(200).cookie("token", token, cookieOptions).json({
         success: true,
         message: "User created successfully",
         user
@@ -78,13 +78,12 @@ export const signin = asyncHandler(async (req, res) => {
 
     const isPasswordMatched = await user.comparePassword(password)
     if(isPasswordMatched) {
-        const token = user.getJwtToken()
-
-        res.cookie("token", token, cookieOptions)
+        const token = await user.getJwtToken()
+        console.log("token signin ==>>", token)
         
         // remove the password before sending the user to frontend
         user.password = undefined;
-        return res.status(200).json({
+        return res.status(200).cookie("token", token, cookieOptions).json({
             success: true,
             message: "Signin successfully",
             user
@@ -203,8 +202,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
     user.password = undefined
 
-    res.cookie("token", token, cookieOptions)
-    res.status(200).json({
+    res.status(200).cookie("token", token, cookieOptions).json({
         success: true,
         message: "Password reset successfully",
         user
