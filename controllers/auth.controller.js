@@ -25,7 +25,7 @@ const cookieOptions = {
 
 // two time async will be taken as once async
 export const signup = asyncHandler(async(req, res) => {
-    const { name , email, password } = req.body
+    const { name , email, password, isAdmin, isModerator } = req.body
     if(!(name || email || password)) {
         throw new CustomError("Please fill all fields", 400)
     }
@@ -40,7 +40,8 @@ export const signup = asyncHandler(async(req, res) => {
     const user = await User.create({
         name,
         email,
-        password
+        password,
+        role: isAdmin ? authRoles.ADMIN : isModerator ? authRoles.MODERATOR : authRoles.USER
     })
     const token = user.getJwtToken()
 
