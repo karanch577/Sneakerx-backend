@@ -22,8 +22,8 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-      - run: npm ci
-      - run: |
+        run: npm ci
+        run: |
         touch .env
         echo "${{ secrets.PROD_ENV_FILE }}" > .env
     
