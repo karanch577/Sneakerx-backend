@@ -14,20 +14,21 @@ jobs:
         node-version: [20.11.0]
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
         run: |
-        touch .env
-        echo "${{ secrets.PROD_ENV_FILE }}" > .env
-    
+          npm ci
+          touch .env
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env
 
-      # Add after install pm2 on EC2 instance
+      # Add after installing pm2 on EC2 instance
       - name: Restart Node.js application with PM2
         run: pm2 restart my_node_app
