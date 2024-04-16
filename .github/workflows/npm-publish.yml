@@ -61,3 +61,7 @@ jobs:
           echo "RAZORPAY_SECRET=${RAZORPAY_SECRET}" >> .env
           echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> .env
           echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> .env
+
+      # Add after install pm2 on EC2 instance
+      - name: Restart Node.js application with PM2
+        run: pm2 restart my_node_app
