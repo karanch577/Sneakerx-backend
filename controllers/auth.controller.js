@@ -11,7 +11,7 @@ const cookieOptions = {
     httpOnly: true,
     secure: true,
     domain: '.sneakerx.xyz',
-    sameSite: 'lax',
+    sameSite: 'none',
 }
 
 /***************************************************************
