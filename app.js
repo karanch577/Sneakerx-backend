@@ -49,7 +49,8 @@ app.get('/api/test', (req, res) => {
   })
 })
 
-// error handler middleware
+// error handler middleware 
+// test
 
 app.use(errorMiddleware)
 
